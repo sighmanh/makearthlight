@@ -1,3 +1,3 @@
 # makearthlight
 for homework
-whatisit
+###### i made a trash
