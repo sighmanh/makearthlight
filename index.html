@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>makearthlight</title>
+<style>
+  body { font-family: Arial, sans-serif; background-color: #fff; color: #000; margin:0; padding:20px;}
+  h1,h2{text-align:center;}
+  .survey label{display:block; margin-bottom:10px;}
+  .btn-group button{
+    margin:5px; padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;
+    background-color:#ccc; color:#fff;
+  }
+  .btn-group button.selected { background-color: orange; }
+  .scene2 { display:none; max-width:600px; margin:20px auto; }
+  .activity { 
+    opacity:0; 
+    transform: translateY(20px);
+    transition: all 0.5s ease-out; 
+    margin:10px 0; 
+    font-weight:bold;
+  }
+  .activity.show { opacity:1; transform: translateY(0);}
+  .activity span.value { color: orange; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 장면1: 설문 -->
+  <div id="scene1" class="survey">
+    <h1>나는 평소에...</h1>
+
+    <label>전기 사용량 (Wh)</label>
+    <div class="btn-group" id="electricity-group">
+      <button onclick="setValue('electricity',100,this)">100 Wh</button>
+      <button onclick="setValue('electricity',500,this)">500 Wh</button>
+      <button onclick="setValue('electricity',1000,this)">1000 Wh</button>
+    </div>
+
+    <label>물 사용량 (L)</label>
+    <div class="btn-group" id="water-group">
+      <button onclick="setValue('water',10,this)">10 L</button>
+      <button onclick="setValue('water',50,this)">50 L</button>
+      <button onclick="setValue('water',100,this)">100 L</button>
+    </div>
+
+    <label>쓰레기 배출량 (L)</label>
+    <div class="btn-group" id="waste-group">
+      <button onclick="setValue('waste',5,this)">5 L</button>
+      <button onclick="setValue('waste',25,this)">25 L</button>
+      <button onclick="setValue('waste',50,this)">50 L</button>
+    </div>
+
+    <button onclick="goToScene2()">결과 보기</button>
+  </div>
+
+  <!-- 장면2: 텍스트 애니메이션 -->
+  <div id="scene2" class="scene2">
+    <h2>우리의 에너지로 할 수 있었던 활동</h2>
+    <div id="activities"></div>
+  </div>
+</div>
+
+<script>
+let survey = { electricity:500, water:50, waste:25 };
+
+// 버튼 선택
+function setValue(key,value,btn){
+  survey[key]=value;
+  const groupId = key+'-group';
+  const buttons = document.getElementById(groupId).querySelectorAll('button');
+  buttons.forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// 장면2 표시
+function goToScene2(){
+  document.getElementById('scene1').style.display='none';
+  const scene2 = document.getElementById('scene2');
+  scene2.style.display='block';
+
+  const activities = [
+    {name:'전구 켜기', unit:'시간', factor:0.01}, 
+    {name:'전자레인지로 핫바 만들기', unit:'개', factor:0.005},
+    {name:'세탁기 사용', unit:'회', factor:0.003},
+    {name:'에어컨 사용', unit:'시간', factor:0.008},
+    {name:'전기 오븐 사용', unit:'시간', factor:0.006},
+    {name:'냉장고 가동', unit:'시간', factor:0.007},
+    {name:'전기차 주행', unit:'km', factor:0.009}
+  ];
+
+  // 총 사용량 계산 (간단 가중치)
+  const totalWaste = survey.electricity + survey.water*10 + survey.waste*20;
+
+  const container = document.getElementById('activities');
+  container.innerHTML = '';
+
+  activities.forEach((act,i)=>{
+    const value = Math.max(1, Math.round(totalWaste * act.factor));
+    const div = document.createElement('div');
+    div.className = 'activity';
+    div.innerHTML = `${act.name}: <span class="value">${value} ${act.unit}</span>`;
+    container.appendChild(div);
+
+    // 애니메이션: 순차적으로 나타나게
+    setTimeout(()=>{ div.classList.add('show'); }, i*500);
+  });
+}
+</script>
+
+</body>
+</html>
+
